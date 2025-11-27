@@ -1,18 +1,12 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
+import plotly.express as px
 import seaborn as sns
 import matplotlib.pyplot as plt
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-import warnings
-
-# Ignore all warnings
-warnings.filterwarnings("ignore")
 sns.set_theme(style="whitegrid", palette="muted")
 
-st.set_page_config(page_title="Customer Satisfaction Case Study", layout="wide")
+
+st.set_page_config(page_title="Play Store App Review Analysis", layout="wide")
 
 st.sidebar.title("Navigation")
 PAGES = [
@@ -40,6 +34,7 @@ The goal of the project is to provide data-driven insights for app developers an
 - To investigate category-wise performance to identify high-demand and high-potential app categories.
 - To compare free vs paid apps in terms of installs, ratings, and market share.
 
+- Data to Upload for Analysis → [link](https://drive.google.com/file/d/1Qr9ymoCWps9qpfwId51PvuIA_JWTKWK_/view?usp=drive_link)
         """
     )
 
@@ -50,78 +45,40 @@ if page == "Conclusion":
 ### **🔍 Summarize Key Findings**
 
 1. **App installs are extremely skewed**
-    - Only a small percentage of apps achieve very high installs (10M+).
-    -  Most apps remain in the low–to–mid install range (1K–100K).
-
+    
 2. **Reviews strongly correlate with installs**
-    - Apps with more reviews consistently have higher installs.
-    - Reviews are the strongest predictor of app popularity.
-
+    
 3. **Ratings show weak correlation with installs**
-    - High or low ratings do not guarantee installs.
-    - Users download apps based on need, not ratings alone.
 
 4. **App size has little effect on installs**
-    - Both small and large apps achieve high installs.
-    - Size does not determine popularity; category and demand matter more.
-
-5. **Free apps dominate the market**
-    - Free apps massively outnumber paid apps.
-    - Free apps get far higher installs; paid apps get fewer installs but slightly better ratings.
-
+    
 6. **Certain categories consistently show higher installs and ratings**
-    - Categories with strong performance include:
-    - Communication, Social, Video Players, Photography, Entertainment → high installs
-    -  Books, Education, Tools, Productivity → high ratings
-
+   
 
 ### **🧠Business Interpretation**
 
 1. **Success depends more on visibility and engagement than on app rating**
-    - Reviews drive installs → the app must focus on gathering reviews early.
-
+    
 2. **Choosing the right category is critical**
-    - Some categories naturally have higher demand.
-    - Entering a saturated category requires strong differentiation.
-
+    
 3. **APK size is not a major barrier**
-    - Users install both small and large apps if value is clear.
-    - Developers should prioritize functionality, not shrinking APK at the cost of features.
 
 4. **Free or freemium is the best model for growth**
-    - Paid apps struggle to gain installs unless they solve a niche, high-value problem.
-    - Free model → faster traction and review generation.
 
 ### **🚀 Suggested Actions (Strategic Recommendations)**
 
 1. **Launch the app as FREE first**
-    - Maximizes downloads and visibility.
-    - Consider monetization through ads or in-app purchases later.
 
 2. **Implement a review-generation strategy**
-    - In-app prompts after task completion
-    - Reward-based review nudges
-    - Email/notification reminders
-    - This directly boosts install growth.
 
 3. **Select the app category strategically**
 
-    - Choose categories that offer:
-        - High demand
-        - High satisfaction (ratings)
-        - Moderate competition
-    - Consider Tools, Productivity, Education, Health, etc., depending on client goals.
-
 4. **Optimize app size but don’t sacrifice functionality**
-    - Target ~10–25 MB range when possible.
-    - If building a heavy category (like gaming), focus on optimization instead of strict size constraints.
-
 
 
 
         """
     )
-
 
 if page != "Welcome":
     st.sidebar.title("Upload Dataset")
@@ -132,123 +89,128 @@ if page != "Welcome":
         st.sidebar.success("Dataset Loaded Successfully!")
     else:
         st.sidebar.info("Please upload a dataset to proceed.")
-        st.stop()
+        data = None
 
-    # Define numeric and categorical columns
-    numeric_columns = data.select_dtypes(include="number").columns.tolist()
-    categorical_columns = data.select_dtypes(include="object").columns.tolist()
-
-    # Helper function to display plots
     def display_plot(fig):
         st.pyplot(fig)
 
-# Univariate Analysis
+
 if page == "Univariate Analysis":
-    st.title("Univariate Analysis", anchor=False)
-    st.header("Explore Single-Variable Trends")
-    st.write("Explore univariate plots with dynamic column selection.")
+    st.title("Univariate Analysis")
+    if data is None:
+        st.warning("➡️  Please upload a dataset to view this analysis.")
+        st.stop()
 
-    # Create a 2x2 subplot layout with increased figure width
-    fig, axes = plt.subplots(2, 2, figsize=(22, 13))
+    st.markdown("### Distribution of App Installs")
+    
+    fig = px.histogram(data, x='log_Installs', nbins=50, title='Distribution of App Installs')
+    st.plotly_chart(fig, use_container_width=True)
 
-    # Histogram
-    hist_col = st.selectbox("Select column for Histogram:", numeric_columns, key="hist", index=0)
-    sns.histplot(data[hist_col], kde=True, ax=axes[0, 0])
-    axes[0, 0].set_title(f"Histogram of {hist_col}", fontsize=30, color="red", weight="bold")
-    axes[0, 0].tick_params(axis='x', labelsize=15, rotation=90)
+    st.markdown("### Distribution of App Ratings")
+    
+    fig = px.histogram(data, x='Rating', nbins=20, title='Distribution of App Ratings')
+    st.plotly_chart(fig, use_container_width=True)
 
+    st.markdown("### Distribution of App Sizes")
+    
+    fig = px.histogram(data, x='log_Size', nbins=50, title='Distribution of App Sizes')
+    st.plotly_chart(fig, use_container_width=True)
 
+    type_counts = data["Type"].value_counts().reset_index()
+    type_counts.columns = ["Type", "Count"]
 
-
-    # Countplot
-    if categorical_columns:
-        count_col = st.selectbox("Select column for Countplot (Categorical):", categorical_columns, key="countplot", index=0)
-        sns.countplot(data=data, x=count_col, ax=axes[0, 1])
-        axes[0, 1].set_title(f"Countplot of {count_col}", fontsize=30, color="red", weight="bold")
-        axes[0, 1].tick_params(axis='x', labelsize=15, rotation=90)
-
-
-
-    # Pie Chart
-    if categorical_columns:
-        pie_col = st.selectbox("Select column for Pie Chart:", categorical_columns, key="pie", index=0)
-        top_categories = data[pie_col].value_counts().sort_values(ascending=False).head(5)
-        top_categories.plot.pie(autopct='%1.1f%%', ax=axes[1, 0], textprops={'fontsize': 30})
-        axes[1, 0].set_title(f"Pie Chart of Top 5 Categories in {pie_col}", fontsize=30, color="red", weight="bold")
+    st.markdown("### Distribution of App Types")
+    fig = px.pie(type_counts, names="Type", values="Count", hole=0.35, title='Distribution of App Types')
+    fig.update_traces(textinfo="percent+label", texttemplate="%{label}<br>%{percent:.0%}" )
+    st.plotly_chart(fig, use_container_width=True)
 
 
+if page == "Bivariate Analysis":
+    st.title("Bivariate Analysis")
+    if data is None:
+        st.warning("➡️  Please upload a dataset to view this analysis.")
+        st.stop()
 
-    # Boxplot
-    box_col = st.selectbox("Select column for Boxplot:", numeric_columns, key="box", index=0)
-    sns.boxplot(data=data, x=box_col, ax=axes[1, 1])
-    axes[1, 1].set_title(f"Boxplot of {box_col}", fontsize=30, color="red", weight="bold")
-    axes[1, 1].tick_params(axis='x', labelsize=15, rotation=90)
+    avg_installs = data.groupby("Type")["Installs"].mean()
+    avg_ratings  = data.groupby("Type")["Rating"].mean()
 
+    fig, axes = plt.subplots(1, 2, figsize=(15, 6))
+    st.markdown("### Average Installs and Average Ratings by App Type")
+    # Boxplot on the left
+    sns.barplot(x=avg_installs.index, y=avg_installs.values, ax=axes[0])
+    axes[0].set_title('Average Installs: Free vs Paid Apps', fontsize=18, fontweight='bold')
+    axes[0].set_ylabel('Average Installs', fontsize=14)
+    axes[0].set_xlabel('App Type', fontsize=14)
+    axes[0].tick_params(axis='x', labelsize=12)
+    axes[0].tick_params(axis='y', labelsize=12)
+    axes[0].grid(visible=True, linestyle='--', alpha=0.7)
+
+    # Barplot on the right
+    sns.barplot(x=avg_ratings.index, y=avg_ratings.values, ax=axes[1])
+    axes[1].set_title('Average Ratings: Free vs Paid Apps', fontsize=18, fontweight='bold')
+    axes[1].set_ylabel('Average Ratings', fontsize=14)
+    axes[1].set_xlabel('App type', fontsize=14)
+    axes[1].tick_params(axis='x', labelsize=12)
+    axes[1].tick_params(axis='y', labelsize=12)
+    axes[1].grid(visible=True, linestyle='--', alpha=0.7)
 
     plt.tight_layout()
     display_plot(fig)
 
 
-# Bivariate Analysis
-elif page == "Bivariate Analysis":
-    st.title("Bivariate Analysis", anchor=False)
-    st.header("Explore Relationships Between Two Variables")
-    st.write("Explore bivariate relationships with dynamic column selection.")
+    top_20_installed_category =  data.groupby('Category')['Installs'].mean().reset_index().sort_values(by='Installs',ascending=False, ignore_index=True).head(20)
+    st.markdown("### Top 20 most installed categories")
 
-    # Create a 3x2 subplot layout with increased figure width
-    fig, axes = plt.subplots(2, 1, figsize=(22, 13))
+    fig = px.bar(top_20_installed_category, x="Category", y="Installs")
+    fig.update_traces( textposition="outside", marker_color="indianred")
+    fig.update_layout(
+    title="Top 20 most installed categories",
+    template="plotly_white",
+    title_x=0.5
 
-    if numeric_columns:
+    )
+    fig.update_yaxes(showgrid=True, title="Average Installs" )
+    fig.update_xaxes(showgrid=False, title="Category" )
+    st.plotly_chart(fig, use_container_width=True)
     
-        # Scatter Plot
-        scatter_x = st.selectbox("X for Scatter Plot:", numeric_columns, key="scatter_x", index=0)
-        scatter_y = st.selectbox("Y for Scatter Plot:", numeric_columns, key="scatter_y", index=0)
-        sns.scatterplot(data=data, x=scatter_x, y=scatter_y, ax=axes[0])
-        axes[0].set_title(f"Scatter Plot of {scatter_x} vs {scatter_y}", fontsize=30, color="red", weight="bold")
-        axes[0].tick_params(axis='x', labelsize=15, rotation=90)
-
-
-    # Bar Plot
-    if categorical_columns:
-        bar_x = st.selectbox("X for Bar Plot (Categorical):", categorical_columns, key="bar_x", index=0)
-        bar_y = st.selectbox("Y for Bar Plot (Numeric):", numeric_columns, key="bar_y", index=0)
-        sns.barplot(data=data, x=bar_x, y=bar_y, ax=axes[1])
-        axes[1].set_title(f"Bar Plot of {bar_x} vs {bar_y}", fontsize=30, color="red", weight="bold")
-        axes[1].tick_params(axis='x', labelsize=15, rotation=90)
-
     
-    plt.tight_layout()
-    display_plot(fig)
+    st.markdown("### App Installs vs Reviews")
+    
+    fig = px.scatter(data, x='log_Reviews', y='log_Installs', trendline='ols', title='App Installs vs Reviews')
+    st.plotly_chart(fig, use_container_width=True)
 
-# Multivariate Analysis
+    st.markdown("### App Installs vs Ratings")
+    
+    fig = px.scatter(data, x='Rating', y='log_Installs', trendline='ols', title='App Installs vs Ratings')
+    st.plotly_chart(fig, use_container_width=True)
+
+    st.markdown("### App Installs vs Size")
+    
+    fig = px.scatter(data, x='log_Size', y='log_Installs', trendline='ols', title='App Installs vs Size')
+    st.plotly_chart(fig, use_container_width=True)
+
+
 elif page == "Multivariate Analysis":
     st.title("Multivariate Analysis", anchor=False)
+    if data is None:
+        st.warning("➡️  Please upload a dataset to view this analysis.")
+        st.stop()
+
     st.header("Discover Patterns Across Multiple Variables")
     st.write("Generate Pairplot and Heatmap for multivariate analysis.")
 
     # Pairplot
     st.subheader("Pairplot")
-    if numeric_columns:
-        pairplot_cols = st.multiselect("Select columns for Pairplot:", numeric_columns, default=numeric_columns[:min(3, len(numeric_columns))])
-        if pairplot_cols:
-            pairplot_fig = sns.pairplot(data[pairplot_cols])
-            st.pyplot(pairplot_fig)
-        else:
-            st.warning("Please select at least one column for the Pairplot.")
-    else:
-        st.error("No numeric columns available for Pairplot.")
-
+    fig, ax = plt.subplots(figsize=(20, 15))
+    fig = sns.pairplot(data[["Rating","log_Installs","log_Reviews","log_Size"]], diag_kind='kde', plot_kws={'alpha':0.6})
+    display_plot(fig)
     # Heatmap
     st.subheader("Heatmap")
-    if numeric_columns:
-        fig, ax = plt.subplots(figsize=(40, 30))
-        sns.heatmap(data[numeric_columns].corr(), annot=True, cmap="coolwarm", ax=ax, annot_kws={"size": 30})
-        ax.set_title("Correlation Heatmap", fontsize=40, color="red", weight="bold")
-        ax.tick_params(axis='x', labelsize=40)
-        ax.tick_params(axis='y', labelsize=40)
-        display_plot(fig)
-    else:
 
-        st.error("No numeric columns available for Heatmap.")
-
-
+    fig, ax = plt.subplots(figsize=(20, 15))
+    sns.heatmap(data[['Rating', 'Installs', 'Reviews', 'Size']].corr(), annot=True, cmap="coolwarm", ax=ax, annot_kws={"size": 30})
+    ax.set_title("Correlation Heatmap", fontsize=40, color="red", weight="bold")
+    ax.tick_params(axis='x', labelsize=40)
+    ax.tick_params(axis='y', labelsize=40)
+    display_plot(fig)
+    
