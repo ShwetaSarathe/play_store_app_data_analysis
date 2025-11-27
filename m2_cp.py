@@ -204,8 +204,8 @@ elif page == "Bivariate Analysis":
         scatter_x = st.selectbox("X for Scatter Plot:", numeric_columns, key="scatter_x", index=0)
         scatter_y = st.selectbox("Y for Scatter Plot:", numeric_columns, key="scatter_y", index=0)
         sns.scatterplot(data=data, x=scatter_x, y=scatter_y, ax=axes[0])
-        axes[0, 1].set_title(f"Scatter Plot of {scatter_x} vs {scatter_y}", fontsize=30, color="red", weight="bold")
-        axes[0, 1].tick_params(axis='x', labelsize=15, rotation=90)
+        axes[0].set_title(f"Scatter Plot of {scatter_x} vs {scatter_y}", fontsize=30, color="red", weight="bold")
+        axes[0].tick_params(axis='x', labelsize=15, rotation=90)
 
 
     # Bar Plot
@@ -213,8 +213,8 @@ elif page == "Bivariate Analysis":
         bar_x = st.selectbox("X for Bar Plot (Categorical):", categorical_columns, key="bar_x", index=0)
         bar_y = st.selectbox("Y for Bar Plot (Numeric):", numeric_columns, key="bar_y", index=0)
         sns.barplot(data=data, x=bar_x, y=bar_y, ax=axes[1])
-        axes[1, 0].set_title(f"Bar Plot of {bar_x} vs {bar_y}", fontsize=30, color="red", weight="bold")
-        axes[1, 0].tick_params(axis='x', labelsize=15, rotation=90)
+        axes[1].set_title(f"Bar Plot of {bar_x} vs {bar_y}", fontsize=30, color="red", weight="bold")
+        axes[1].tick_params(axis='x', labelsize=15, rotation=90)
 
     
     plt.tight_layout()
@@ -250,4 +250,5 @@ elif page == "Multivariate Analysis":
     else:
 
         st.error("No numeric columns available for Heatmap.")
+
 
