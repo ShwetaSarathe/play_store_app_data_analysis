@@ -196,21 +196,14 @@ elif page == "Bivariate Analysis":
     st.write("Explore bivariate relationships with dynamic column selection.")
 
     # Create a 3x2 subplot layout with increased figure width
-    fig, axes = plt.subplots(2, 2, figsize=(22, 13))
+    fig, axes = plt.subplots(2, 1, figsize=(22, 13))
 
     if numeric_columns:
-    # Line Plot 1
-        line_x1 = st.selectbox("X for Line Plot 1:", numeric_columns, key="line_x1", index=0)
-        line_y1 = st.selectbox("Y for Line Plot 1:", numeric_columns, key="line_y1", index=0)
-        sns.lineplot(data=data, x=line_x1, y=line_y1, ax=axes[0, 0])
-        axes[0, 0].set_title(f"Line Plot of {line_x1} vs {line_y1}", fontsize=30, color="red", weight="bold")
-        axes[0, 0].tick_params(axis='x', labelsize=15, rotation=90)
-
-
+    
         # Scatter Plot
         scatter_x = st.selectbox("X for Scatter Plot:", numeric_columns, key="scatter_x", index=0)
         scatter_y = st.selectbox("Y for Scatter Plot:", numeric_columns, key="scatter_y", index=0)
-        sns.scatterplot(data=data, x=scatter_x, y=scatter_y, ax=axes[0, 1])
+        sns.scatterplot(data=data, x=scatter_x, y=scatter_y, ax=axes[0, 0])
         axes[0, 1].set_title(f"Scatter Plot of {scatter_x} vs {scatter_y}", fontsize=30, color="red", weight="bold")
         axes[0, 1].tick_params(axis='x', labelsize=15, rotation=90)
 
@@ -223,15 +216,7 @@ elif page == "Bivariate Analysis":
         axes[1, 0].set_title(f"Bar Plot of {bar_x} vs {bar_y}", fontsize=30, color="red", weight="bold")
         axes[1, 0].tick_params(axis='x', labelsize=15, rotation=90)
 
-
-    # Boxplot
-        box_x = st.selectbox("X for Boxplot (Categorical):", categorical_columns, key="box_x_bi", index=0)
-        box_y = st.selectbox("Y for Boxplot (Numeric):", numeric_columns, key="box_y_bi", index=0)
-        sns.boxplot(data=data, x=box_x, y=box_y, ax=axes[1, 1])
-        axes[1, 1].set_title(f"Boxplot of {box_x} vs {box_y}", fontsize=30, color="red", weight="bold")
-        axes[1, 1].tick_params(axis='x', labelsize=15, rotation=90)
-
-
+    
     plt.tight_layout()
     display_plot(fig)
 
@@ -263,4 +248,5 @@ elif page == "Multivariate Analysis":
         ax.tick_params(axis='y', labelsize=40)
         display_plot(fig)
     else:
+
         st.error("No numeric columns available for Heatmap.")
